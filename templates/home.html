@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Surprise</title>
+    <style>
+        body {
+            text-align: center;
+            background-color: #FFCCCB;
+            color: #d500f9;
+            font-family: 'Arial', sans-serif;
+            animation: backgroundAnimation 10s infinite alternate;
+            position: relative;
+            padding-bottom: 50px;
+        }
+
+        @keyframes backgroundAnimation {
+            0% { background-color: #FFCCCB; }
+            33% { background-color: #81d4fa; }
+            66% { background-color: #81C784; }
+            100% { background-color: #D1C4E9; }
+        }
+
+        h1 {
+            font-size: 50px;
+            margin-top: 50px;
+            animation: textAnimation 3s ease-in-out, heartBeat 1.5s infinite;
+        }
+
+        @keyframes textAnimation {
+            0% { color: #d500f9; }
+            50% { color: #ff4081; }
+            100% { color: #d500f9; }
+        }
+
+        /* Heart beat animation */
+        @keyframes heartBeat {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+
+        .heart {
+            color: #ff4081;
+            font-size: 60px;
+            animation: heartBeat 1.5s infinite;
+        }
+
+        /* Flying heart animation */
+        @keyframes flyingHeart {
+            0% {
+                opacity: 1;
+                transform: translate(0, 0);
+            }
+            100% {
+                opacity: 0;
+                transform: translate(var(--x), var(--y));
+            }
+        }
+
+        .flying-heart {
+            position: absolute;
+            font-size: 50px;
+            animation: flyingHeart 4s ease-in-out infinite;
+        }
+
+        .countdown {
+            font-size: 30px;
+            margin-top: 20px;
+            color: #ff4081;
+        }
+
+        .video-button, .love-notes button {
+            padding: 10px 20px;
+            background-color: #ff4081;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .video-button:hover, .love-notes button:hover {
+            background-color: #d500f9;
+        }
+
+        .content-section {
+            display: none;
+            margin-top: 20px;
+        }
+
+        .content-section.show {
+            display: block;
+        }
+
+        .surprise {
+            margin-top: 20px;
+        }
+
+        .guestbook textarea {
+            margin-top: 10px;
+            padding: 10px;
+            width: 100%;
+            max-width: 300px;
+            font-size: 16px;
+        }
+
+        .guestbook button {
+            margin-top: 10px;
+            padding: 10px 20px;
+            background-color: #ff4081;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        /* Image container and responsiveness */
+        .image-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;  /* Space between images */
+            margin-top: 20px;
+        }
+
+        .image-container img {
+            max-width: 100%;  /* Makes images responsive */
+            height: auto;     /* Maintains the aspect ratio */
+            border-radius: 10px;  /* Optional: Adds rounded corners */
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);  /* Optional: Adds a shadow effect */
+            object-fit: cover;  /* Ensures images fill the container while maintaining aspect ratio */
+            width: 300px;  /* Optional: Set a fixed width, adjust as needed */
+        }
+
+        @media (max-width: 768px) {
+            .image-container img {
+                width: 100%;  /* Images will take up full width on smaller screens */
+            }
+        }
+
+        @media (max-width: 480px) {
+            .image-container img {
+                width: 100%;  /* Images will take up full width on very small screens */
+            }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 40px;
+            }
+
+            .countdown p {
+                font-size: 24px;
+            }
+
+            .video-button, .love-notes button {
+                padding: 8px 15px;
+                font-size: 14px;
+            }
+
+            .guestbook textarea {
+                width: 90%;
+                max-width: 100%;
+            }
+
+            .guestbook button {
+                width: 90%;
+                max-width: 100%;
+            }
+        }
+
+        @media (max-width: 480px) {
+            h1 {
+                font-size: 30px;
+            }
+
+            .countdown p {
+                font-size: 20px;
+            }
+
+            .video-button, .love-notes button {
+                padding: 6px 12px;
+                font-size: 12px;
+            }
+
+            .guestbook textarea {
+                width: 95%;
+            }
+
+            .guestbook button {
+                width: 95%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>🎉 Happy Birthday, Maha! 🎂💋💚 <span class="heart">💖</span></h1>
+    <p>Wishing you the best day filled with love ❤️, laughter 😄, and happiness 🌸. Enjoy every moment! 🥳💐</p>
+
+    <audio autoplay loop>
+        <source src="{{ url_for('static', filename='music.mp3') }}" type="audio/mp3">
+    </audio>
+
+    <div class="countdown">
+        <p>Time left until the birthday:</p>
+        <p id="countdown"></p>
+    </div>
+
+    <div class="love-notes">
+        <button onclick="showLoveNote()">Click for a Love Note</button>
+        <p id="note"></p>
+    </div>
+
+    <div class="birthday-video">
+        <h2>Your Birthday Video</h2>
+        <button class="video-button" onclick="showContent('video-section')">Show Birthday Video</button>
+        <div class="content-section" id="video-section">
+            <video width="100%" max-width="600" controls>
+                <source src="{{ url_for('static', filename='birthday_video.mp4') }}" type="video/mp4">
+            </video>
+        </div>
+    </div>
+
+    <div class="gallery">
+        <h2>Our Special Memories</h2>
+        <button class="video-button" onclick="showContent('images-section')">Show Images</button>
+        <div class="content-section" id="images-section">
+            <div class="image-container">
+                <img src="{{ url_for('static', filename='photo2.jpg') }}" alt="Memory 1">
+                <img src="{{ url_for('static', filename='photo3.jpg') }}" alt="Memory 2">
+                <img src="{{ url_for('static', filename='photo4.jpg') }}" alt="Memory 3">
+                <img src="{{ url_for('static', filename='photo5.jpg') }}" alt="Memory 4">
+                <img src="{{ url_for('static', filename='photo6.jpg') }}" alt="Memory 5">
+                <img src="{{ url_for('static', filename='photo7.jpg') }}" alt="Memory 6">
+                <img src="{{ url_for('static', filename='photo8.jpg') }}" alt="Memory 7">
+                <img src="{{ url_for('static', filename='photo9.jpg') }}" alt="Memory 8">
+                <img src="{{ url_for('static', filename='photo10.jpg') }}" alt="Memory 9">
+                <img src="{{ url_for('static', filename='photo11.jpg') }}" alt="Memory 10">
+                <img src="{{ url_for('static', filename='photo12.jpg') }}" alt="Memory 11">
+                <img src="{{ url_for('static', filename='photo13.jpg') }}" alt="Memory 12">
+                <img src="{{ url_for('static', filename='photo14.jpg') }}" alt="Memory 13">
+            </div>
+        </div>
+    </div>
+
+   
+    <div class="surprise" style="text-align: center; margin-top: 50px;">
+        <h2>🎉 Surprise! 🎉</h2>
+        <button class="video-button" onclick="toggleSurprise()" 
+            style="background-color: #ff4081; color: white; border: none; padding: 10px 20px; 
+                   font-size: 18px; border-radius: 5px; cursor: pointer; transition: 0.3s;">
+            Show
+        </button>
+    
+        <div id="secret-message" 
+            style="display: none; text-align: center; margin-top: 20px; background-color: #ffe0f0; 
+                   padding: 20px; border-radius: 10px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); 
+                   max-width: 500px; margin-left: auto; margin-right: auto;">
+            
+            <h2>My Love, Maha ❤️✨</h2>
+            <p>Since you came into my life, everything became brighter like the ☀️.</p>
+            <p>You are my happiness 😍, my heartbeat 💖, and my sweetest dream 💫.</p>
+            <p>Your smile 😊 melts my worries, and your love fills my soul with warmth 🔥.</p>
+            <p>Every moment with you feels like magic ✨, and I can’t imagine my life without you 💑.</p>
+            <p>You are my biggest blessing 🙏, my forever love 💞. I promise to cherish you always and love you endlessly 💕.</p>
+    
+            <h2>🎂🎉 Happy Birthday, My Maha! 🎊🎁💖</h2>
+    
+            <p><strong>Yours forever,</strong></p>
+            <p><strong>Karthik 💌💘</strong></p>
+        </div>
+    </div>
+
+    <a href="{{ url_for('logout') }}" class="logout">Logout</a>
+
+    <div class="flying-heart">💗</div>
+    <div class="flying-heart">💗</div>
+    <div class="flying-heart">💗</div>
+    <div class="flying-heart">💗</div>
+    <div class="flying-heart">💗</div>
+    <div class="flying-heart">💗</div>
+    <div class="flying-heart">💗</div>
+    <div class="flying-heart">💗</div>
+    <div class="flying-heart">💗</div>
+    <div class="flying-heart">💗</div>
+
+    <script>
+        const flyingHearts = document.querySelectorAll('.flying-heart');
+        flyingHearts.forEach(heart => {
+            const xStart = Math.random() * 100 - 50;
+            const yStart = Math.random() * 100 - 50;
+            const xEnd = Math.random() * 500 - 250;
+            const yEnd = Math.random() * 500 - 250;
+
+            heart.style.setProperty('--x', `${xEnd}px`);
+            heart.style.setProperty('--y', `${yEnd}px`);
+
+            heart.style.left = `${50 + xStart}%`;
+            heart.style.top = `${50 + yStart}%`;
+
+            heart.style.animationDuration = `${Math.random() * 4 + 4}s`;
+        });
+
+        var birthday = new Date("April 2, 2025 00:00:00").getTime();
+
+        var x = setInterval(function() {
+            var now = new Date().getTime();
+            var distance = birthday - now;
+
+            var days = Math.floor(distance / (1000 * 60 * 60 * 24));
+            var hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            var minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+            var seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+            document.getElementById("countdown").innerHTML = days + "d " + hours + "h " + minutes + "m " + seconds + "s ";
+
+            if (distance < 0) {
+                clearInterval(x);
+                document.getElementById("countdown").innerHTML = "Happy Birthday Maha!😍💚💜😘😘😘";
+            }
+        }, 1000);
+
+        const notes = [
+            "You light up my world like nobody else! 💖✨",
+            "I’m so lucky to have you in my life. 🍀💫",
+            "Every moment with you is a treasure. 💎❤️",
+            "I can’t wait to celebrate many more birthdays with you! 🎉💞"
+        ];
+
+        function showLoveNote() {
+            const randomNote = notes[Math.floor(Math.random() * notes.length)];
+            document.getElementById("note").innerText = randomNote;
+        }
+
+        function showContent(contentId) {
+            const contentSection = document.getElementById(contentId);
+            contentSection.classList.toggle('show');
+        
+        }
+    function showContent(id) {
+        var content = document.getElementById(id);
+        content.style.display = (content.style.display === "none") ? "block" : "none";
+    }
+
+function toggleSurprise() {
+    var message = document.getElementById("secret-message");
+    if (message.style.display === "none") {
+        message.style.display = "block";
+    } else {
+        message.style.display = "none";
+    }
+}
+    </script>
+</body>
+</html>
